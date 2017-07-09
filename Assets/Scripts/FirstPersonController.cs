@@ -12,10 +12,14 @@ public class FirstPersonController : MonoBehaviour {
 	public float idleDuration;
 	public GameObject gun;
 	public AnimationClip[] gunClip;
+	public GameObject bullets;
+	public GameObject mCamera;
 
 	private string animState;
 	private float idleCounter;
 	private Dictionary<string, int> clipMapping;
+	private int bulletCount;
+	private Ray aim;
 
 	void Awake () {
 		animState = "Idle";
@@ -26,9 +30,18 @@ public class FirstPersonController : MonoBehaviour {
 		for(int i = 0; i < gunClip.Length; i++) {
 			clipMapping.Add(gunClip[i].name, i);
 		}
+
+
+		bulletCount = bullets.transform.childCount;
+	}
+
+	void Start () {
+		Cursor.visible = false;
+		aim = mCamera.GetComponent<Camera>().ScreenPointToRay(new Vector2(Screen.width / 2, Screen.height / 2));
 	}
 
 	void Update () {
+		RaycastHit hit;
 		Vector3 dir = Input.GetAxis("Vertical") * transform.forward + Input.GetAxis("Horizontal") * transform.right;
 		dir.Normalize();
 
@@ -40,6 +53,10 @@ public class FirstPersonController : MonoBehaviour {
 
 		if (Input.GetMouseButtonDown(0)) {
 			animState = ANIM_FIRE;
+			
+			if (Physics.Raycast(aim, out hit)) {
+				Debug.Log(hit.collider.gameObject.name);
+			}
 		}
 
 		if (Input.GetKeyDown("space")) {
@@ -84,10 +101,24 @@ public class FirstPersonController : MonoBehaviour {
 	void Fire () {
 		PlayAnim(ANIM_FIRE);
 		ResetAnimState();
+
+		// ui
+		if (bulletCount <= 0) {
+			return;
+		}
+
+		bulletCount -= 1;
+		bullets.transform.GetChild(bulletCount).gameObject.SetActive(false);
 	}
 
 	void Reload() {
 		PlayAnim(ANIM_RELOAD);
 		ResetAnimState();
+
+		// ui
+		bulletCount = bullets.transform.childCount;
+		for (int i = 0; i < bulletCount; i++) {
+			bullets.transform.GetChild(i).gameObject.SetActive(true);
+		}
 	}
 }
