@@ -37,3 +37,8 @@ sysinfo.txt
 
 # Visual Studio Code
 /.vscode/
+
+/Assets/Plugins*
+/Assets/Editor*
+/Assets/NoesisGUI*
+/Assets/StreamingAssets*
